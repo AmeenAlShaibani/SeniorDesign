@@ -1,0 +1,35 @@
+State of the art survey: 
+
+It is reported that it is possible to discriminate between two points located
+at least 0.5mm apart [9], [10].
+
+Tactile systems classified into the following major categories, based
+on the modality used:
+- pressure (mechanical energy),
+- vibration (mechanical energy),
+- electric field,
+- temperature (or thermal flow).
+
+1. 
+A refreshable Braille display (RBD) is an electro-mechanical device displays Braille characters
+in a sequential way by raising and lowering pins through holes in a flat surface, in
+response to an electronic signal.
+
+In the paper "An innovative idea for low cost Braille e-reader" They use a 3d printed square that has braille letters printed on every side, and 
+the sqaure is rotated to reveal the desired braille sequence. 
+
+In the paper " Rotating-wheel braille display for continuous refreshable braille. " They use a wheel that the user places their finger against, and the 
+wheel rotates to reveal braille characters
+
+Pros: - A refreshable display is a similar idea to what we are trying to achieve, so we can take inspiration from it 
+
+cons: - Technologies are all developed for braille 
+	- it can be a difficult to place english letters on surfaces to have them rotate.
+
+2. HamsaTouch ** There is only a youtube video, could not find the research paper. 
+
+The system is composed of an electro-tactile display with 512 electrodes, the same number of optical sensors beneath each electrode, 
+and a smartphone with a camera and an LCD. The smartphone acquires the surrounding view, conducts image processing and displays the image on the LCD screen. 
+The image is captured by the optical sensors which activate the electrodes to create a tactile image.
+
+

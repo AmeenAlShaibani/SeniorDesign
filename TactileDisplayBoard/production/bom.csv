@@ -1,0 +1,8 @@
+Designator,Footprint,Quantity,Value,LCSC Part #
+"C1, C2",C_Radial_D10.0mm_H16.0mm_P5.00mm,2,100uF,
+"J1, J2",BarrelJack_CUI_PJ-102AH_Horizontal,2,Conn_01x02,
+"J3, J5",PinSocket_2x03_P2.54mm_Vertical,2,Microstep_Jumper,
+"J4, J6",JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical,2,Conn_Motor,
+J7,PinSocket_1x01_P2.54mm_Vertical,1,PowerSwitch,
+"U1, U3",MODULE_A4988_STEPPER_MOTOR_DRIVER_CARRIER,2,A4988,
+U2,MODULE_ESP32-DEVKITC,1,ESP32-DEVKITC,

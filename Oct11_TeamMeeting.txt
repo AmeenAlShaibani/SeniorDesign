@@ -1,0 +1,29 @@
+Map customer reqs to design req in Design Inputs-Reqts Spreadsheet (*One Person)
+Outline verification plans in spreadsheet and charter (*Split it 4 ways)
+
+
+Wednesday:
+Look over customer requirements again ( Wed All the team)
+DONE: Make pdf accessible (Wednesday All the team)
+DONE: Set up meeting with teacher (Andrea)
+Progress Report (Wednesday All the Team)
+Send email to Dr. H about risk management docs (Wed)
+DONE : Send the 2-3 requirement to Dr. Auger for Thursday (Wed)
+
+Reqs: 
+DONE : Talk about adding English vs Braille as a customer req. (col 11)
+Talk about adding Student should be able to solve problems on the device as a req. (col 13)
+Adding universal access to app as an unspoken req? (col 16)
+Adding that the device should be useable in a classroom setting as a req? (col 18, 19)
+
+
+Missing customer reqs:
+1, 2, 3
+
+if customer is not technically oriented, maybe dont make them look at design reqs.
+
+
+stage gate 2: will we need a powerpoint?
+Ask about Risk management
+Ask Auger about meeting on thursday, will it be repetitive?
+Ask about teacher email
