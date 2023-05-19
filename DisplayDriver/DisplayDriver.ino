@@ -1,122 +1,197 @@
-#include <SoftwareSerial.h>
 #include <Adafruit_MotorShield.h>
 #include <EEPROM.h>
 #include <Arduino.h>
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
 #include "CharacterWheel.h"
-
-// Pins for nema 11 motor
-const int nema17_dirPin  = 4;
-const int nema17_stepPin = 3; 
-const int nema17_sleepPin   = 2;
-
-// Pins for nema 11 motor
-const int nema11_dirPin  = 7;
-const int nema11_stepPin = 6; 
-const int nema11_sleepPin = 5;
-
-//enable pin for both motors, to turn both on or off
-const int enPin = 8;
-
-//Pins for the HM10 module
-const int RX = 13; 
-const int TX   = 12;
-
-//nums to refer to motors
-const int nema17 = 177;
-const int nema11 = 111;
+#include "DriverPins.h"
+#include "WheelArray.h"
+#include "MotorControl.h"
 
 
-SoftwareSerial HM10(TX, RX); // RX and TX are flipped
-char appData;  
-String inData = "";
+class MyCallbacks: public BLECharacteristicCallbacks {
+
+  public:
+    MyCallbacks(MotorControl* controller, WheelArray* wheels) : controller(controller), wheels(wheels) {}
+
+    void onWrite(BLECharacteristic *pCharacteristic) {
+
+      std::string value = pCharacteristic->getValue();
+
+      if (value.length() > 0) {
+
+        // Reset function
+        if(value.compare("RESET") == 0){
+          Serial.println("Reset Requested");
+          wheels->reset();
+          pCharacteristic->setValue("Reset Request Successful");
+        }
+        // run a specific motor in a specific direction for a specifc num of steps.
+        // format: [f/r]nema[11/17][numsteps] : run nema [11/17] [forward/reverse] for [numsteps]
+        //
+        else if(value[0] == 'f' || value[0] == 'r') {
+          char stepString[6];
+          char motorchar;
+          int steps; 
+          
+          //get the motor string
+          motorchar = value[1];
+          
+          //get the step string
+          int loopnum;
+          for (loopnum = 2; loopnum < value.length(); loopnum++)
+              stepString[loopnum-2] = value[loopnum];
+          stepString[loopnum-2] = '\0';
+
+          //change cstring array to intger
+          steps = std::atoi(stepString);
+
+          //NOTE: d refers to driving gear, l refers to the linear actuator
+                //f is forward, r is reverse
+          if (motorchar == 'd')
+          {
+            if (value[0] == 'f')
+            {
+              controller->changeDirection(nema11,forward);
+            } else {
+              controller->changeDirection(nema11,backward);
+
+            }
+            controller->runSteps(nema11, steps);
+            pCharacteristic->setValue("Ran nema 11 motor for " + std::to_string(steps) + value[0]);
+          } 
+          else if (motorchar == 'l') {
+            if (value[0] == 'f')
+            {
+              controller->changeDirection(nema17,forward);
+            } else {
+              controller->changeDirection(nema17,backward);
+            }
+            //if(steps < 13250)
+            controller->runSteps(nema17, steps);
+            pCharacteristic->setValue("Ran nema 17 motor for " + std::to_string(steps) + value[0]);
+          }
+
+        } 
+        // else its an equation: 
+        else {
+
+          Serial.println("Equation is: ");
+          for (int i = 0; i < value.length(); i++)
+            Serial.print(value[i]);
+          pCharacteristic->setValue("Equation received is: " + value);
+
+          //TODO: add some checking to make sure that equation is less than 20 characters
+          // and that equation has correct symbols.
+          wheels->write(value);
+          
+        }
+
+        //notify tells the phone that charactersitic changed
+        pCharacteristic->notify();
+      }
+    }
+
+    //HELPER FUNCTIONS
+    void displaySteps(int steps) {
+        Serial.println("*********");
+        Serial.print("Number of Steps: ");
+        // for (int i = 0; i < value.length(); i++)
+          Serial.print(steps);
+
+        Serial.println();
+        Serial.println("*********");
+    }
+  
+  private:
+    MotorControl* controller;
+    WheelArray* wheels;
+};
+
+MotorControl controller;
+WheelArray wheels;
+
 
 void setup()
 
 {
-  //setup hm-10
-  Serial.begin(9600);
-  Serial.println("HM10 serial started at 9600");
-  HM10.begin(9600); // set HM10 serial at 9600 baud rate
+  Serial.begin(115200);
+  delay(2000);
 
-  
-  pinMode(nema17_stepPin,OUTPUT); 
-  pinMode(nema17_dirPin,OUTPUT);
-  pinMode(nema17_sleepPin,OUTPUT);
+  //Bluetooth device configs
+  BLEDevice::init("BIT_ESP32");
+  BLEServer *pServer = BLEDevice::createServer();
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+                                         CHARACTERISTIC_UUID,
+                                         BLECharacteristic::PROPERTY_READ |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
+                                         BLECharacteristic::PROPERTY_INDICATE
+                                       );
+  pCharacteristic->setCallbacks(new MyCallbacks(&controller, &wheels));
+  pCharacteristic->setValue("Hello Ian");
+  pService->start();
 
-   
-  pinMode(nema11_stepPin,OUTPUT); 
-  pinMode(nema11_dirPin,OUTPUT);
-  pinMode(nema11_sleepPin,OUTPUT);  
+  //Advertise the bluetooth service
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
 
-  pinMode(enPin,OUTPUT);
-
-  //enPin and sleepPins are negated, i.e driver is enabled when enPin is low
-  digitalWrite(enPin,LOW);
-  digitalWrite(nema17_sleepPin,LOW);
-  digitalWrite(nema11_sleepPin,LOW);
-
-  Wheel wheel;
 }
 
 
 void loop()
 
 {
-  
-  HM10.listen();  // listen the HM10 port
 
-  while (HM10.available() > 0) {   // if HM10 sends something then read
-    appData = HM10.read();
-    inData = String(appData);  // save the data in string format
-    Serial.write(appData);
-  }
-
-  if (Serial.available()) {           // Read user input if available.
-    delay(10);
-    HM10.write(Serial.read());
-  }
 
 }
 
-void changeDirection(int motor, int state) {
-  if(motor == nema11) {
-    digitalWrite(nema11_dirPin,state); 
-  } else if(motor == nema17) {
-    digitalWrite(nema17_dirPin,state); 
-  }
-}
+// void runSteps(int motor, int numSteps) {
 
-void runSteps(int motor, int numSteps) {
+//   if(motor == nema11) {
 
-  if(motor == nema11) {
+//     // Makes 200 pulses for making one full cycle rotation
+//     // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
+//     for(int x = 0; x < numSteps; x++) {
+//       digitalWrite(nema11_stepPin,HIGH); 
+//       delayMicroseconds(500000); 
 
-    // Makes 200 pulses for making one full cycle rotation
-    // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
-    for(int x = 0; x < numSteps; x++) {
-      digitalWrite(nema11_stepPin,HIGH); 
-      delayMicroseconds(100); 
+//       digitalWrite(nema11_stepPin,LOW); 
+//       delayMicroseconds(500000); 
+//     }
+//     delay(1000); // One second delay
 
-      digitalWrite(nema11_stepPin,LOW); 
-      delayMicroseconds(100); 
-    }
-    delay(1000); // One second delay
-
-  } else if(motor == nema17) {
+//   } else if(motor == nema17) {
     
-    // Makes 200 pulses for making one full cycle rotation
-    // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
-    for(int x = 0; x < numSteps; x++) {
-      digitalWrite(nema17_stepPin,HIGH); 
-      delayMicroseconds(100); 
+//     // Makes 200 pulses for making one full cycle rotation
+//     // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
+//     for(int x = 0; x < numSteps; x++) {
+//       digitalWrite(nema17_stepPin,HIGH); 
+//       delayMicroseconds(1000); 
 
-      digitalWrite(nema17_stepPin,LOW); 
-      delayMicroseconds(100); 
-    }
-    delay(1000); // One second delay
+//       digitalWrite(nema17_stepPin,LOW); 
+//       delayMicroseconds(1000); 
+//     }
+//     delay(1000); // One second delay
 
-  }
+//   }
 
-}
+// }
 
-//to change between 1 character and the other on the driving gear you need 20 full steps
-//to change between 1 wheel and the other on the linear actuator you need 665 full steps
+
+//***********************NOTES***********************//
+//HIGH MAKES motor move backwards - to base
+// LOW makes motor move forwards
+//to change between 1 character and the other on the driving gear you need 20 full steps - nema 11 
+//to change between 1 wheel and the other on the linear actuator you need 665 full steps - nema17
+
+//***********************Change Log***********************//
+//Added toBase() and global variable nema17_pos
+//    - Variable increments every time the nema17 poart of runSteps is called
+//    - toBase() changes direction and decreases by that number of steps
