@@ -26,6 +26,18 @@ class MyCallbacks: public BLECharacteristicCallbacks {
           Serial.println("Reset Requested");
           wheels->reset();
           pCharacteristic->setValue("Reset Request Successful");
+
+        } else if(value.compare("OFF")==0){
+          wheels->reset();
+          pCharacteristic->setValue("Shutting Down System");
+          pCharacteristic->notify();
+          delay(200);
+          digitalWrite(PS_EN, HIGH);
+        } else if(value.compare("ESTOP")==0){
+          pCharacteristic->setValue("Turning Power off to the system");
+          pCharacteristic->notify();
+          delay(200);
+          digitalWrite(PS_EN, HIGH);
         }
         // run a specific motor in a specific direction for a specifc num of steps.
         // format: [f/r]nema[11/17][numsteps] : run nema [11/17] [forward/reverse] for [numsteps]

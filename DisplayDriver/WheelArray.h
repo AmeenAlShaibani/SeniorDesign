@@ -32,7 +32,7 @@ public:
     }
 
     void reset() {
-        for (int i = motor_index; i > 0; i--) {
+        for (int i = motor_index; i >= 0; i--) {
             //move linear actuator to correct wheel:
             moveTo(i);
 

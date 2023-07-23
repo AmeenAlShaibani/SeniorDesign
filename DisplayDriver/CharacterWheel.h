@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    static const size_t bufferSize = 26;
+    static const size_t bufferSize = 25;
     static const size_t stepCharOffset = 20;
 
     char buffer[bufferSize] = {'_','a', 'b', 'c', 'x', 'y', 'm', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '(', ')', '^', '='};
