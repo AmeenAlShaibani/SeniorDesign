@@ -1,3 +1,7 @@
+/*
+This file defines a class for a single character wheel, and includes functions to rotate the wheel to the desired character
+*/
+
 #pragma once
 
 #include "MotorControl.h"
@@ -8,20 +12,6 @@ public:
     Wheel()  {
         controller = &MotorControl::getInstance();
         current_index = 0;
-    }
-
-    void rotate_left(int steps) {
-        controller->changeDirection(nema11, backward);
-        controller->runSteps(nema11,steps*stepCharOffset);
-
-        current_index = (current_index - steps + bufferSize) % bufferSize;
-    }
-
-    void rotate_right(int steps) {
-        controller->changeDirection(nema11, forward);
-        controller->runSteps(nema11,steps*stepCharOffset);
-
-        current_index = (current_index + steps) % bufferSize;
     }
 
     void rotate_to(char target) {
@@ -42,6 +32,8 @@ public:
         }
     }
 
+    //use const to signify that this function must not be used to change a variable. 
+    //TODO: see if this should be used in the get position function in the wheel array. 
     char get_top() const {
         return buffer[current_index];
     }
@@ -55,8 +47,23 @@ private:
 
     MotorControl* controller;
 
+    void rotate_left(int steps) {
+        controller->changeDirection(NEMA11, BACKWARD);
+        controller->runSteps(NEMA11,steps*stepCharOffset);
+
+        current_index = (current_index - steps + bufferSize) % bufferSize;
+    }
+
+    void rotate_right(int steps) {
+        controller->changeDirection(NEMA11, FORWARD);
+        controller->runSteps(NEMA11,steps*stepCharOffset);
+
+        current_index = (current_index + steps) % bufferSize;
+    }
+
+    //used to find index of target char
     int find(char target) {
-        for (int i = 0; i < bufferSize; ++i) {
+        for (int i = 0; i < bufferSize; i++) {
             if (buffer[i] == target) {
                 return i;
             }

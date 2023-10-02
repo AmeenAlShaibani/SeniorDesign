@@ -10,40 +10,40 @@
 // #include "MotorControl.h"
 
 
-// //refers to the current position of the nema17
+// //refers to the current position of the NEMA17
 // int nema17_pos = 0;
 
 // class MyCallbacks: public BLECharacteristicCallbacks {
 
-//   const int nema17 = 177;
-//   const int nema11 = 111;
+//   const int NEMA17 = 177;
+//   const int NEMA11 = 111;
 
 //   void runSteps(int motor, int numSteps) {
 
-//     if(motor == nema11) {
+//     if(motor == NEMA11) {
 //       // Makes 200 pulses for making one full cycle rotation
 //       // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
 //       for(int x = 0; x < numSteps; x++) {
-//         digitalWrite(nema11_stepPin,HIGH); 
+//         digitalWrite(NEMA11_STEP_PIN,HIGH); 
 //         delayMicroseconds(4600); 
 
-//         digitalWrite(nema11_stepPin,LOW); 
+//         digitalWrite(NEMA11_STEP_PIN,LOW); 
 //         delayMicroseconds(4600); 
 //       }
 //       delay(500); // One second delay
 
 //     } 
-//     else if(motor == nema17) {
-//       //Add numSteps to global nema17 position
+//     else if(motor == NEMA17) {
+//       //Add numSteps to global NEMA17 position
 //       nema17_pos += numSteps;
 
 //       // Makes 200 pulses for making one full cycle rotation
 //       // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
 //       for(int x = 0; x < numSteps; x++) {
-//         digitalWrite(nema17_stepPin,HIGH); 
+//         digitalWrite(NEMA17_STEP_PIN,HIGH); 
 //         delayMicroseconds(1000); 
 
-//         digitalWrite(nema17_stepPin,LOW); 
+//         digitalWrite(NEMA17_STEP_PIN,LOW); 
 //         delayMicroseconds(1000); 
 //       }
 //       delay(500); // One second delay
@@ -54,21 +54,21 @@
 
 //   void toBase() { //resets the nema 17 motor to 0
 //   // TODO reset all wheels to the null character using nema 11
-//   // will need to change the while loop to increment the nema17 in 665 step intervals
+//   // will need to change the while loop to increment the NEMA17 in 665 step intervals
 
 //     //Set to move backwards
-//     digitalWrite(nema17_dirPin, HIGH);
+//     digitalWrite(NEMA17_DIR_PIN, HIGH);
 //     while(nema17_pos > 0){
 //       if(nema17_pos >= 540){
-//         runSteps(nema17, 540);
+//         runSteps(NEMA17, 540);
 //         nema17_pos = nema17_pos - 540;
 //       } else {
-//         runSteps(nema17, nema17_pos);
+//         runSteps(NEMA17, nema17_pos);
 //         nema17_pos = 0;
 //       }
 //     }
 //     //reset to move forwards
-//     digitalWrite(nema17_dirPin,LOW);
+//     digitalWrite(NEMA17_DIR_PIN,LOW);
 //   }
 
 //   void displaySteps(int steps) {
@@ -101,8 +101,8 @@
 //         steps = stoi(stepString);
       
 //         //stoi changes string to integer
-//         runSteps(nema11, steps);
-//         runSteps(nema17, steps);
+//         runSteps(NEMA11, steps);
+//         runSteps(NEMA17, steps);
 //         pCharacteristic->setValue("Ran both motors for " + value + " Steps");
 //       } 
 
@@ -116,8 +116,8 @@
 //         steps = stoi(stepString);
       
 //         //stoi changes string to integer
-//         runSteps(nema11, steps);
-//         runSteps(nema17, steps);
+//         runSteps(NEMA11, steps);
+//         runSteps(NEMA17, steps);
 //         pCharacteristic->setValue("Ran both motors for " + value + " Steps");
 //       } 
 //  // else its an equation: 
@@ -144,22 +144,22 @@
 //   Serial.begin(115200);
 //   delay(2000);
   
-//   pinMode(nema17_stepPin,OUTPUT); 
-//   pinMode(nema17_dirPin,OUTPUT);
-//   pinMode(nema17_sleepPin,OUTPUT);
+//   pinMode(NEMA17_STEP_PIN,OUTPUT); 
+//   pinMode(NEMA17_DIR_PIN,OUTPUT);
+//   pinMode(NEMA17_SLEEP_PIN,OUTPUT);
 
    
-//   pinMode(nema11_stepPin,OUTPUT); 
-//   pinMode(nema11_dirPin,OUTPUT);
-//   pinMode(nema11_sleepPin,OUTPUT);  
+//   pinMode(NEMA11_STEP_PIN,OUTPUT); 
+//   pinMode(NEMA11_DIRPIN,OUTPUT);
+//   pinMode(NEMA11_SLEEP_PIN,OUTPUT);  
 
 //   pinMode(M_EN,OUTPUT);
 //   pinMode(PS_EN,OUTPUT);
 
 //   //enPin and sleepPins are negated, i.e driver is enabled when enPin is low, and motors sleep when LOW
 //   digitalWrite(M_EN,LOW);
-//   digitalWrite(nema17_sleepPin,HIGH);
-//   digitalWrite(nema11_sleepPin,HIGH);
+//   digitalWrite(NEMA17_SLEEP_PIN,HIGH);
+//   digitalWrite(NEMA11_SLEEP_PIN,HIGH);
 
 //   Wheel wheel;
 
@@ -186,10 +186,10 @@
 //   pAdvertising->setMinPreferred(0x12);
 //   BLEDevice::startAdvertising();
 
-//   // runSteps(nema17, 200);
+//   // runSteps(NEMA17, 200);
 //   // Serial.write("Ran the nema 17");
-//   changeDirection(nema11, LOW);
-//   changeDirection(nema17, LOW);
+//   changeDirection(NEMA11, LOW);
+//   changeDirection(NEMA17, LOW);
 
 
 // }
@@ -203,37 +203,37 @@
 // }
 
 // void changeDirection(int motor, int state) {
-//   if(motor == nema11) {
-//     digitalWrite(nema11_dirPin,state); 
-//   } else if(motor == nema17) {
-//     digitalWrite(nema17_dirPin,state); 
+//   if(motor == NEMA11) {
+//     digitalWrite(NEMA11_DIRPIN,state); 
+//   } else if(motor == NEMA17) {
+//     digitalWrite(NEMA17_DIR_PIN,state); 
 //   }
 // }
 
 // // void runSteps(int motor, int numSteps) {
 
-// //   if(motor == nema11) {
+// //   if(motor == NEMA11) {
 
 // //     // Makes 200 pulses for making one full cycle rotation
 // //     // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
 // //     for(int x = 0; x < numSteps; x++) {
-// //       digitalWrite(nema11_stepPin,HIGH); 
+// //       digitalWrite(NEMA11_STEP_PIN,HIGH); 
 // //       delayMicroseconds(500000); 
 
-// //       digitalWrite(nema11_stepPin,LOW); 
+// //       digitalWrite(NEMA11_STEP_PIN,LOW); 
 // //       delayMicroseconds(500000); 
 // //     }
 // //     delay(1000); // One second delay
 
-// //   } else if(motor == nema17) {
+// //   } else if(motor == NEMA17) {
     
 // //     // Makes 200 pulses for making one full cycle rotation
 // //     // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
 // //     for(int x = 0; x < numSteps; x++) {
-// //       digitalWrite(nema17_stepPin,HIGH); 
+// //       digitalWrite(NEMA17_STEP_PIN,HIGH); 
 // //       delayMicroseconds(1000); 
 
-// //       digitalWrite(nema17_stepPin,LOW); 
+// //       digitalWrite(NEMA17_STEP_PIN,LOW); 
 // //       delayMicroseconds(1000); 
 // //     }
 // //     delay(1000); // One second delay
@@ -247,9 +247,9 @@
 // //HIGH MAKES motor move backwards - to base
 // // LOW makes motor move forwards
 // //to change between 1 character and the other on the driving gear you need 20 full steps - nema 11 
-// //to change between 1 wheel and the other on the linear actuator you need 665 full steps - nema17
+// //to change between 1 wheel and the other on the linear actuator you need 665 full steps - NEMA17
 
 // //***********************Change Log***********************//
 // //Added toBase() and global variable nema17_pos
-// //    - Variable increments every time the nema17 poart of runSteps is called
+// //    - Variable increments every time the NEMA17 poart of runSteps is called
 // //    - toBase() changes direction and decreases by that number of steps

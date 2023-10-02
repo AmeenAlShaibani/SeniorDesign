@@ -1,15 +1,22 @@
+/*
+
+This file defines a singleton class for a motor controller, to control the stepper motors. 
+
+*/
+
 #pragma once
 
-#include "DriverPins.h"
+#include "Configs.h"
 #include <Arduino.h>
-
-//NOTE: this needs to be changed if microstepping is used. 
 
 class MotorControl {
 public:
 
+    //return a reference to the MotorControl instance
     static MotorControl& getInstance() {
-        static MotorControl instance; // Guaranteed to be destroyed and instantiated on first use.
+      //The static variable constructor is called on first use and never again, returning the
+      // same variable each time the function is called afterwards
+        static MotorControl instance; 
         return instance;
     }
 
@@ -17,91 +24,96 @@ public:
     MotorControl(MotorControl const&) = delete;
     void operator=(MotorControl const&) = delete;
 
-  MotorControl() {
-    //TODO: setting pinmode multile times in wheel array and character wheel (having multiple controllers) may be a problem, check if it crashes
-      pinMode(nema17_stepPin,OUTPUT); 
-      pinMode(nema17_dirPin,OUTPUT);
-      pinMode(nema17_sleepPin,OUTPUT);
-
-      pinMode(nema11_stepPin,OUTPUT); 
-      pinMode(nema11_dirPin,OUTPUT);
-      pinMode(nema11_sleepPin,OUTPUT);  
-
-      pinMode(M_EN,OUTPUT);
-      pinMode(PS_EN,OUTPUT);
-
-      //enPin and sleepPins are negated, i.e driver is enaled when enPin is low, and motors sleep when LOW
-      digitalWrite(M_EN,LOW);
-      digitalWrite(nema17_sleepPin,HIGH);
-      digitalWrite(nema11_sleepPin,HIGH);
-
-      //default motor to run forward
-      digitalWrite(nema11_dirPin,LOW); 
-      digitalWrite(nema17_dirPin,LOW); 
-  }
-
+ 
   void changeDirection(int motor, int state) {
-    if(motor == nema11) {
-      digitalWrite(nema11_dirPin,state); 
-    } else if(motor == nema17) {
-      digitalWrite(nema17_dirPin,state); 
+    if(motor == NEMA11) {
+      digitalWrite(NEMA11_DIRPIN,state); 
+    } else if(motor == NEMA17) {
+      digitalWrite(NEMA17_DIR_PIN,state); 
     }
   }
 
   void runSteps(int motor, int numSteps) {
 
-    if(motor == nema11) {
+    if(motor == NEMA11) {
       
-      if(numSteps > nema11_stepLimit) {
-        Serial.println("The number of steps is greater than the nema11 limit: " + nema11_stepLimit);
+      //used to prevent NEMA11 from rotating more than needed (full wheel rotation)
+      if(numSteps > NEMA11_STEPLIMIT) {
+        Serial.println("The number of steps is greater than the NEMA11 limit: " + NEMA11_STEPLIMIT);
         return;
       }
 
       // Makes 200 pulses for making one full cycle rotation
       // for 1/8 microstep, you need 200*8 pulses for 1 rev. 
       for(int x = 0; x < numSteps; x++) {
-        digitalWrite(nema11_stepPin,HIGH); 
-        delayMicroseconds(4600); 
+        digitalWrite(NEMA11_STEP_PIN,HIGH); 
+        delayMicroseconds(NEMA11_PULSE_DELAY_us); 
 
-        digitalWrite(nema11_stepPin,LOW); 
-        delayMicroseconds(4600); 
+        digitalWrite(NEMA11_STEP_PIN,LOW); 
+        delayMicroseconds(NEMA11_PULSE_DELAY_us); 
       }
-      delay(200); 
+      delay(MOTOR_MOVEMENT_DELAY_ms); 
 
-    } else if(motor == nema17) {
+    } else if(motor == NEMA17) {
 
-      if(numSteps > nema17_stepLimit) {
-        Serial.println("The number of steps is greater than the nema17 limit: " + nema17_stepLimit);
+      //Used to prevent linear actuator from Stalling
+      if(numSteps > NEMA17_STEPLIMIT) {
+        Serial.println("The number of steps is greater than the NEMA17 limit: " + NEMA17_STEPLIMIT);
         return;
       }
       
-      while(numSteps > 540) {
-        for(int x = 0; x < 540; x++) {
-          digitalWrite(nema17_stepPin,HIGH); 
-          delayMicroseconds(1000); 
+      //The ARB_NEMA17_LIMIT is a number that specifies the max number of steps that the nema17 can move at once.
+      //We do not know why this happens, but to avoid this issue, we simply keep a counter, and decrement it ARB_NEMA17_LIMIT steps at a time
+      // to reach the desired number of steps 
+      while(numSteps > ARB_NEMA17_LIMIT) {
+        for(int x = 0; x < ARB_NEMA17_LIMIT; x++) {
+          digitalWrite(NEMA17_STEP_PIN,HIGH); 
+          delayMicroseconds(NEMA17_PULSE_DELAY_us); 
 
-          digitalWrite(nema17_stepPin,LOW); 
-          delayMicroseconds(1000); 
+          digitalWrite(NEMA17_STEP_PIN,LOW); 
+          delayMicroseconds(NEMA17_PULSE_DELAY_us); 
         }
-        delay(200); 
-        numSteps = numSteps - 540;
+        delay(MOTOR_MOVEMENT_DELAY_ms); 
+        numSteps = numSteps - ARB_NEMA17_LIMIT;
       }
 
-
+      // if the number of steps is less than ARB_NEMA17_LIMIT and greater than 0, then move the specified number of steps 
       if(numSteps > 0) {
         for(int x = 0; x < numSteps; x++) {
-          digitalWrite(nema17_stepPin,HIGH); 
-          delayMicroseconds(1000); 
+          digitalWrite(NEMA17_STEP_PIN,HIGH); 
+          delayMicroseconds(NEMA17_PULSE_DELAY_us); 
 
-          digitalWrite(nema17_stepPin,LOW); 
-          delayMicroseconds(1000); 
+          digitalWrite(NEMA17_STEP_PIN,LOW); 
+          delayMicroseconds(NEMA17_PULSE_DELAY_us); 
         }
-        delay(200); 
+        delay(MOTOR_MOVEMENT_DELAY_ms); 
       }
     }
   }
 
 private:
+
+ MotorControl() {
+      pinMode(NEMA17_STEP_PIN,OUTPUT); 
+      pinMode(NEMA17_DIR_PIN,OUTPUT);
+      pinMode(NEMA17_SLEEP_PIN,OUTPUT);
+
+      pinMode(NEMA11_STEP_PIN,OUTPUT); 
+      pinMode(NEMA11_DIRPIN,OUTPUT);
+      pinMode(NEMA11_SLEEP_PIN,OUTPUT);  
+
+      pinMode(M_EN,OUTPUT);
+      pinMode(PS_EN,OUTPUT);
+
+      //enPin and sleepPins are idle high, i.e driver is enabled when enPin is low, and motors sleep when LOW
+      digitalWrite(M_EN,LOW);
+      digitalWrite(NEMA17_SLEEP_PIN,HIGH);
+      digitalWrite(NEMA11_SLEEP_PIN,HIGH);
+
+      //default motor to run forward
+      digitalWrite(NEMA11_DIRPIN,LOW); 
+      digitalWrite(NEMA17_DIR_PIN,LOW); 
+  }
 
   
 };

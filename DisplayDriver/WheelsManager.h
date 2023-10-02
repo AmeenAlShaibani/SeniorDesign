@@ -1,12 +1,20 @@
+/* 
+This class defines an array of 26 characterWheels, and includes functions to write out an equation 
+by spinning each wheel to the correct character
+*/
+
+//TODO: Allow the user to specify number of wheels in the constructor.
+//TODO: Convert class to Singelton 
+
 #pragma once
 
 #include "CharacterWheel.h"
 #include "MotorControl.h"
 #include <Arduino.h>
 
-class WheelArray {
+class WheelsManager {
 public:
-    WheelArray() {
+    WheelsManager() {
         controller = &MotorControl::getInstance();
         motor_index = 0;
         curr_equationLength = 0;
@@ -44,13 +52,15 @@ public:
         }
     }
 
-    int getPosition() {
+    // function to return the index of the stepper motor.
+    int getPosition() const {
       return motor_index;
     }
 
 private:
+// Use size_t since its unsigned and for portability and to indicate that variables are used to index/count and not for arithmatic. 
     static const size_t numWheels = 20;
-    static const size_t stepOffset = 665;
+    static const size_t stepOffset = 665;  //number of steps to move between wheels
 
     size_t motor_index;
     size_t curr_equationLength;
@@ -64,14 +74,14 @@ private:
 
       //move back, since index 0 is the leftmost wheel, since we write from left to right
       if(distance > 0) {
-        controller->changeDirection(nema17, backward);
-        controller->runSteps(nema17, distance*stepOffset);
+        controller->changeDirection(NEMA17, BACKWARD);
+        controller->runSteps(NEMA17, distance*stepOffset);
       } 
       //move forward 
       else if(distance < 0) {
         distance = std::abs(distance);
-        controller->changeDirection(nema17, forward);
-        controller->runSteps(nema17, distance*stepOffset);
+        controller->changeDirection(NEMA17, FORWARD);
+        controller->runSteps(NEMA17, distance*stepOffset);
       }
     }
 };
